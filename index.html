@@ -455,6 +455,25 @@
     display:flex;
     gap:10px;
   }
+  .teaser-row{
+    padding:14px 20px 0;
+  }
+  .btn-teaser{
+    width:100%;
+    background:transparent;
+    border:1.5px solid var(--accent);
+    color:var(--accent-soft);
+    padding:13px;
+    border-radius:14px;
+    font-family:inherit;
+    font-weight:800;
+    font-size:14.5px;
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  .btn-teaser:active{
+    background:rgba(232,163,61,.12);
+  }
 
   .btn-watch{
     flex:1;
@@ -618,6 +637,9 @@
     <div class="season-tabs" id="season-tabs"></div>
     <div class="episode-grid" id="episode-grid"></div>
   </div>
+  <div class="teaser-row" id="teaser-row" style="display:none;">
+    <button class="btn-teaser" id="btn-teaser">🎬 Tizerni ko'rish</button>
+  </div>
   <div class="sheet-actions">
     <button class="btn-watch" id="btn-watch">▶ Tomosha qilish</button>
     <button class="btn-fav" id="btn-fav" aria-label="Sevimlilarga qo'shish">☆</button>
@@ -653,15 +675,15 @@ if (tg) {
 }
 
 const MOVIES = [
-  { id:13, title:"Qasoskorlar: Halokat kuni", year:2026, genre:"Jangari", upcoming:true, releaseDate:"18-dekabr, 2026", duration:"—", icon:"💀", desc:"Uch xil olamdan kelgan qahramonlar halokatli to'qnashuvga yuz tutadi va hech qachon uchramagan tahdidga qarshi kurashadi. Marvel jamoasi bu safar X-Men vakillari bilan birga chiqadi.", poster:"image/qasoskorlar.jpg", video:"" },
-  { id:14, title:"Jodugarlar jangi", year:2020, genre:"Anime", rating:8.5, duration:"3 fasl • 47+ qism", icon:"👹", desc:"La'natlangan barmoqni yutib yuborgan yigit o'zi la'natlanadi va qolgan qismlarni topib, la'natdan qutulish uchun jodugarlik maktabiga o'qishga kiradi.", poster:"image/jodugarlarjangi.jpg", video:"",
-    seasons:[ { label:"1-fasl", episodes:24 }, { label:"2-fasl", episodes:23 }, { label:"3-fasl", episodes:1 } ] },
-  { id:15, title:"Ko'k zindon", year:2022, genre:"Anime", rating:8.1, duration:"2 fasl • 38 qism", icon:"⚽", desc:"Yaponiya terma jamoasiga eng yaxshi hujumchini tayyorlash uchun yuzlab yosh futbolchi maxsus 'Ko'k zindon' dasturiga kiritiladi — faqat bittasi g'olib chiqadi.", poster:"image/kokzindon.jpg", video:"",
-    seasons:[ { label:"1-fasl", episodes:24 }, { label:"2-fasl", episodes:14 } ] },
-  { id:16, title:"O'rgimchak odam: Yangi kun", year:2026, genre:"Jangari", upcoming:true, releaseDate:"31-iyul, 2026", duration:"2 soat 25 daq", icon:"🕷️", desc:"Do'stlari uni unutgan shaharda yolg'iz qolgan Piter Parker to'liq vaqtli O'rgimchak odam sifatida jinoyatchilikka qarshi kurashadi, biroq bu yuk uni kutilmagan o'zgarishga olib keladi.", poster:"image/orgimchakodam.jpg", video:"" },
-  { id:17, title:"Flash", year:2023, genre:"Fantastika", rating:6.7, duration:"144 daq", icon:"⚡", desc:"O'z super tezligidan foydalanib o'tmishni o'zgartirgan Barri Allen, natijada butunlay boshqa va xavfli olamga tushib qoladi, uni asl vaqtga qaytarish esa oson bo'lmaydi.", poster:"image/flash.jpg", video:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" },
-  { id:18, title:"Agarda", year:2021, genre:"Serial", rating:7.4, duration:"3 fasl • 30+ qism", icon:"🌀", desc:"Marvel olamidagi taniqli voqealardan biri boshqacha yakunlansa, nima bo'lishi mumkinligini ko'rsatuvchi animatsion antologiya — har bir qism yangi muqobil borliqni ochadi.", poster:"image/agarda.jpg", video:"",
-    seasons:[ { label:"1-fasl", episodes:9 }, { label:"2-fasl", episodes:9 }, { label:"3-fasl", episodes:9 } ] }
+  { id:13, title:"Qasoskorlar: Halokat kuni", year:2026, genre:"Jangari", upcoming:true, releaseDate:"18-dekabr, 2026", duration:"—", icon:"💀", desc:"Uch xil olamdan kelgan qahramonlar halokatli to'qnashuvga yuz tutadi va hech qachon uchramagan tahdidga qarshi kurashadi. Marvel jamoasi bu safar X-Men vakillari bilan birga chiqadi.", poster:"image/qasoskorlar.jpg", video:"video/qasoskorlar-tizer.mp4" },
+  { id:14, title:"Jodugarlar jangi", year:2020, genre:"Anime", rating:8.5, duration:"3 fasl • 47+ qism", icon:"👹", desc:"La'natlangan barmoqni yutib yuborgan yigit o'zi la'natlanadi va qolgan qismlarni topib, la'natdan qutulish uchun jodugarlik maktabiga o'qishga kiradi.", poster:"image/jodugarlarjangi.jpg", video:"video/jodugarlarjangi.mp4",
+    seasons:[ { label:"1-fasl", episodes:[ {num:1, video:"video/jodugarlarjangi-1-1.mp4"}, {num:2, video:"video/jodugarlarjangi-1-2.mp4"}, {num:3, video:"video/jodugarlarjangi-1-3.mp4"}, {num:4, video:"video/jodugarlarjangi-1-4.mp4"}, {num:5, video:"video/jodugarlarjangi-1-5.mp4"}, {num:6, video:"video/jodugarlarjangi-1-6.mp4"}, {num:7, video:"video/jodugarlarjangi-1-7.mp4"}, {num:8, video:"video/jodugarlarjangi-1-8.mp4"}, {num:9, video:"video/jodugarlarjangi-1-9.mp4"}, {num:10, video:"video/jodugarlarjangi-1-10.mp4"}, {num:11, video:"video/jodugarlarjangi-1-11.mp4"}, {num:12, video:"video/jodugarlarjangi-1-12.mp4"}, {num:13, video:"video/jodugarlarjangi-1-13.mp4"}, {num:14, video:"video/jodugarlarjangi-1-14.mp4"}, {num:15, video:"video/jodugarlarjangi-1-15.mp4"}, {num:16, video:"video/jodugarlarjangi-1-16.mp4"}, {num:17, video:"video/jodugarlarjangi-1-17.mp4"}, {num:18, video:"video/jodugarlarjangi-1-18.mp4"}, {num:19, video:"video/jodugarlarjangi-1-19.mp4"}, {num:20, video:"video/jodugarlarjangi-1-20.mp4"}, {num:21, video:"video/jodugarlarjangi-1-21.mp4"}, {num:22, video:"video/jodugarlarjangi-1-22.mp4"}, {num:23, video:"video/jodugarlarjangi-1-23.mp4"}, {num:24, video:"video/jodugarlarjangi-1-24.mp4"} ] }, { label:"2-fasl", episodes:23 }, { label:"3-fasl", episodes:1 } ] },
+  { id:15, title:"Ko'k zindon", year:2022, genre:"Anime", rating:8.1, duration:"2 fasl • 23 qism", icon:"⚽", desc:"Yaponiya terma jamoasiga eng yaxshi hujumchini tayyorlash uchun yuzlab yosh futbolchi maxsus 'Ko'k zindon' dasturiga kiritiladi — faqat bittasi g'olib chiqadi.", poster:"image/kokzindon.jpg", video:"video/kokzindon.mp4",
+    seasons:[ { label:"1-fasl", episodes:[ {num:1, video:"video/kokzindon-1-1.mp4"}, {num:2, video:"video/kokzindon-1-2.mp4"}, {num:3, video:"video/kokzindon-1-3.mp4"}, {num:4, video:"video/kokzindon-1-4.mp4"}, {num:5, video:"video/kokzindon-1-5.mp4"}, {num:6, video:"video/kokzindon-1-6.mp4"}, {num:7, video:"video/kokzindon-1-7.mp4"}, {num:8, video:"video/kokzindon-1-8.mp4"}, {num:9, video:"video/kokzindon-1-9.mp4"} ] }, { label:"2-fasl", episodes:14 } ] },
+  { id:16, title:"O'rgimchak odam: Yangi kun", year:2026, genre:"Jangari", upcoming:true, releaseDate:"31-iyul, 2026", duration:"2 soat 25 daq", icon:"🕷️", desc:"Do'stlari uni unutgan shaharda yolg'iz qolgan Piter Parker to'liq vaqtli O'rgimchak odam sifatida jinoyatchilikka qarshi kurashadi, biroq bu yuk uni kutilmagan o'zgarishga olib keladi.", poster:"image/orgimchakodam.jpg", video:"video/orgimchakodam-tizer.mp4" },
+  { id:17, title:"Flash", year:2023, genre:"Fantastika", rating:6.7, duration:"144 daq", icon:"⚡", desc:"O'z super tezligidan foydalanib o'tmishni o'zgartirgan Barri Allen, natijada butunlay boshqa va xavfli olamga tushib qoladi, uni asl vaqtga qaytarish esa oson bo'lmaydi.", poster:"image/flash.jpg", video:"video/flash.mp4" },
+  { id:18, title:"Agarda", year:2021, genre:"Serial", rating:7.4, duration:"3 fasl • 30+ qism", icon:"🌀", desc:"Marvel olamidagi taniqli voqealardan biri boshqacha yakunlansa, nima bo'lishi mumkinligini ko'rsatuvchi animatsion antologiya — har bir qism yangi muqobil borliqni ochadi.", poster:"image/agarda.jpg", video:"video/agarda.mp4",
+    seasons:[ { label:"1-fasl", episodes:[ {num:1, video:"video/agarda-1-1.mp4"}, {num:2, video:"video/agarda-1-2.mp4"}, {num:3, video:"video/agarda-1-3.mp4"}, {num:4, video:"video/agarda-1-4.mp4"}, {num:5, video:"video/agarda-1-5.mp4"}, {num:6, video:"video/agarda-1-6.mp4"}, {num:7, video:"video/agarda-1-7.mp4"}, {num:8, video:"video/agarda-1-8.mp4"}, {num:9, video:"video/agarda-1-9.mp4"} ] }, { label:"2-fasl", episodes:9 }, { label:"3-fasl", episodes:9 } ] }
 ];
 
 const GENRE_THEME = {
@@ -852,9 +874,10 @@ function openSheet(m){
     document.querySelectorAll('#season-tabs .season-tab').forEach((el,i) => el.classList.toggle('active', i === seasonIdx));
     document.querySelectorAll('#episode-grid .episode-btn').forEach(el => el.classList.toggle('active', Number(el.textContent) === epNum));
     updateWatchLabel();
-    if (m.video) {
+    const videoUrl = episodeVideo(season, epNum);
+    if (videoUrl) {
       closeSheet();
-      openPlayer(m, `${m.title} — ${season.label}, ${epNum}-qism`);
+      openPlayer({ ...m, video: videoUrl }, `${m.title} — ${season.label}, ${epNum}-qism`);
     } else {
       const msg = `"${m.title}" ${season.label}, ${epNum}-qism tez orada qo'shiladi 🎬`;
       showMsg(msg);
@@ -880,11 +903,23 @@ function openSheet(m){
     });
   }
 
+  function episodeCount(season){
+    return Array.isArray(season.episodes) ? season.episodes.length : season.episodes;
+  }
+  function episodeVideo(season, epNum){
+    if (Array.isArray(season.episodes)) {
+      const ep = season.episodes.find(e => e.num === epNum);
+      return ep?.video || '';
+    }
+    return m.video || '';
+  }
+
   function renderEpisodeGrid(){
     const gridEl = document.getElementById('episode-grid');
     gridEl.innerHTML = '';
     const season = m.seasons[selectedSeason];
-    for (let ep = 1; ep <= season.episodes; ep++) {
+    const count = episodeCount(season);
+    for (let ep = 1; ep <= count; ep++) {
       const btn = document.createElement('div');
       btn.className = 'episode-btn' + (ep === selectedEpisode ? ' active' : '');
       btn.textContent = ep;
@@ -901,20 +936,35 @@ function openSheet(m){
     episodesBlock.style.display = 'none';
   }
 
+  const teaserRow = document.getElementById('teaser-row');
+  const teaserBtn = document.getElementById('btn-teaser');
+  if (m.upcoming && m.video) {
+    teaserRow.style.display = 'block';
+    teaserBtn.onclick = () => {
+      closeSheet();
+      openPlayer(m, `${m.title} — Tizer`);
+    };
+  } else {
+    teaserRow.style.display = 'none';
+    teaserBtn.onclick = null;
+  }
+
   watchBtn.onclick = () => {
     if (m.seasons && m.seasons.length) {
       playEpisode(selectedSeason, selectedEpisode);
       return;
     }
-    if (!m.upcoming && m.video) {
+    if (m.upcoming) {
+      const msg = `"${m.title}" ${m.releaseDate}'da chiqadi — chiqqanda sizga xabar beramiz 🔔`;
+      showMsg(msg);
+      return;
+    }
+    if (m.video) {
       closeSheet();
       openPlayer(m);
       return;
     }
-    const msg = m.upcoming
-      ? `"${m.title}" ${m.releaseDate}'da chiqadi — chiqqanda sizga xabar beramiz 🔔`
-      : `"${m.title}" filmi tez orada qo'shiladi 🎬`;
-    showMsg(msg);
+    showMsg(`"${m.title}" filmi tez orada qo'shiladi 🎬`);
   };
   sheet.classList.add('open');
   backdrop.classList.add('open');
