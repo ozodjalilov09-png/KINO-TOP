@@ -66,10 +66,10 @@
   }
   h1.marquee{
     font-family:'Bebas Neue',sans-serif;
-    font-size:44px;
-    letter-spacing:.03em;
+    font-size:60px;
+    letter-spacing:.04em;
     margin:0;
-    line-height:.95;
+    line-height:.9;
     background:linear-gradient(180deg, var(--accent-soft), var(--accent) 60%, #b9781f);
     -webkit-background-clip:text;
     background-clip:text;
@@ -141,6 +141,21 @@
     gap:14px;
     padding:16px 20px 10px;
   }
+  @media (min-width:640px){
+    .grid{ grid-template-columns:repeat(3,1fr); }
+  }
+  @media (min-width:900px){
+    .grid{ grid-template-columns:repeat(4,1fr); gap:18px; }
+    header.hero, .search-wrap, .chips, .grid, .empty{
+      max-width:1100px;
+      margin-left:auto;
+      margin-right:auto;
+    }
+    body{ max-width:1180px; margin:0 auto; }
+  }
+  @media (min-width:1300px){
+    .grid{ grid-template-columns:repeat(5,1fr); }
+  }
 
   /* Ticket stub card — the signature element */
   .ticket{
@@ -156,10 +171,63 @@
   .poster{
     width:100%;
     aspect-ratio:2/3;
-    object-fit:cover;
-    display:block;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
     background:linear-gradient(160deg,#242030,#171520);
   }
+  .poster::before{
+    content:"";
+    position:absolute; inset:0;
+    background:radial-gradient(120px 120px at 50% 38%, rgba(255,255,255,.10), transparent 70%);
+  }
+  .poster-icon{
+    font-size:52px;
+    filter:drop-shadow(0 6px 14px rgba(0,0,0,.45));
+    position:relative;
+    z-index:1;
+  }
+  .poster-title{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    padding:16px 10px 10px;
+    font-family:'Bebas Neue',sans-serif;
+    font-size:15px;
+    letter-spacing:.02em;
+    line-height:1.05;
+    text-align:center;
+    color:rgba(255,255,255,.85);
+    background:linear-gradient(0deg, rgba(0,0,0,.55), transparent);
+    z-index:1;
+  }
+  .poster-logo{
+    position:absolute;
+    top:8px; left:8px;
+    display:flex;
+    align-items:center;
+    gap:4px;
+    padding:4px 8px 4px 6px;
+    background:rgba(0,0,0,.4);
+    backdrop-filter:blur(3px);
+    border:1px solid rgba(232,163,61,.4);
+    border-radius:7px;
+    font-family:'Bebas Neue',sans-serif;
+    font-size:13px;
+    letter-spacing:.08em;
+    color:var(--accent-soft);
+    z-index:1;
+  }
+  .poster-logo::before{
+    content:"🎬";
+    font-size:12px;
+  }
+  .sheet-poster .poster-icon{ font-size:32px; }
+  .sheet-poster .poster-title{ font-size:12px; padding:12px 6px 8px; }
+  .sheet-poster .poster-logo{ font-size:10px; padding:3px 6px 3px 5px; top:6px; left:6px; }
+  .sheet-poster .poster-logo::before{ font-size:9px; }
   .rating-badge{
     position:absolute;
     top:8px; right:8px;
@@ -174,6 +242,18 @@
     align-items:center;
     gap:3px;
     border:1px solid rgba(232,163,61,.35);
+  }
+  .fav-mark{
+    position:absolute;
+    top:8px; left:8px;
+    font-size:15px;
+    filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));
+    z-index:2;
+  }
+  .rating-badge.upcoming{
+    color:var(--velvet);
+    border-color:rgba(193,68,61,.45);
+    letter-spacing:.03em;
   }
   .stub-divider{
     position:relative;
@@ -258,8 +338,13 @@
   .sheet-poster{
     width:104px; aspect-ratio:2/3;
     border-radius:12px;
-    object-fit:cover;
+    overflow:hidden;
+    position:relative;
     flex:0 0 auto;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
     box-shadow:0 8px 24px rgba(0,0,0,.4);
   }
   .sheet-info{ padding-top:2px; }
@@ -297,11 +382,80 @@
     line-height:1.6;
     color:#d8d3e0;
   }
+
+  /* Season / episode picker for series & anime */
+  .episodes-block{
+    padding:16px 20px 0;
+  }
+  .episodes-label{
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    font-weight:700;
+    margin:0 0 8px;
+  }
+  .season-tabs{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-bottom:4px;
+    margin-bottom:10px;
+    scrollbar-width:none;
+  }
+  .season-tabs::-webkit-scrollbar{ display:none; }
+  .season-tab{
+    flex:0 0 auto;
+    padding:7px 14px;
+    border-radius:999px;
+    background:var(--bg-elev-2);
+    border:1px solid #2a2632;
+    color:var(--text-dim);
+    font-size:12.5px;
+    font-weight:700;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:all .15s ease;
+  }
+  .season-tab.active{
+    background:var(--accent);
+    color:#1a1305;
+    border-color:var(--accent);
+  }
+  .episode-grid{
+    display:grid;
+    grid-template-columns:repeat(6, 1fr);
+    gap:8px;
+  }
+  @media (min-width:900px){
+    .episode-grid{ grid-template-columns:repeat(10, 1fr); }
+  }
+  .episode-btn{
+    aspect-ratio:1/1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--bg-elev-2);
+    border:1px solid #2a2632;
+    border-radius:9px;
+    color:var(--text);
+    font-size:12.5px;
+    font-weight:700;
+    cursor:pointer;
+    transition:all .12s ease;
+  }
+  .episode-btn:active{ transform:scale(.93); }
+  .episode-btn.active{
+    background:var(--accent);
+    color:#1a1305;
+    border-color:var(--accent);
+  }
   .sheet-actions{
     padding:18px 20px 4px;
     display:flex;
     gap:10px;
   }
+
   .btn-watch{
     flex:1;
     background:linear-gradient(135deg, var(--accent-soft), var(--accent));
@@ -315,6 +469,20 @@
     display:flex; align-items:center; justify-content:center; gap:8px;
     cursor:pointer;
   }
+  .btn-fav{
+    background:var(--bg-elev-2);
+    color:var(--accent-soft);
+    border:1px solid #2a2632;
+    padding:14px 16px;
+    border-radius:14px;
+    font-size:18px;
+    line-height:1;
+    cursor:pointer;
+  }
+  .btn-fav.active{
+    background:rgba(232,163,61,.15);
+    border-color:var(--accent);
+  }
   .btn-close{
     background:var(--bg-elev-2);
     color:var(--text-dim);
@@ -325,9 +493,92 @@
     font-weight:700;
     cursor:pointer;
   }
+
+  /* Video player overlay */
+  .player-backdrop{
+    position:fixed; inset:0;
+    background:#000;
+    opacity:0; pointer-events:none;
+    transition:opacity .2s ease;
+    z-index:60;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .player-backdrop.open{ opacity:1; pointer-events:auto; }
+  .player-inner{
+    position:relative;
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .player-inner video{
+    width:100%;
+    max-height:100%;
+    outline:none;
+    background:#000;
+  }
+  .player-close{
+    position:absolute;
+    top:calc(14px + var(--safe-top));
+    right:14px;
+    width:38px; height:38px;
+    border-radius:50%;
+    background:rgba(20,18,26,.7);
+    backdrop-filter:blur(4px);
+    border:1px solid rgba(255,255,255,.15);
+    color:var(--text);
+    font-size:18px;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    z-index:2;
+  }
+  .player-title{
+    position:absolute;
+    top:calc(14px + var(--safe-top));
+    left:16px;
+    right:64px;
+    color:var(--text);
+    font-family:'Bebas Neue',sans-serif;
+    font-size:18px;
+    letter-spacing:.02em;
+    text-shadow:0 2px 8px rgba(0,0,0,.6);
+    z-index:2;
+    pointer-events:none;
+  }
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:calc(24px + var(--safe-bottom, 0px));
+    transform:translateX(-50%) translateY(20px);
+    background:rgba(24,20,30,.96);
+    border:1px solid rgba(232,163,61,.35);
+    color:var(--text);
+    padding:13px 18px;
+    border-radius:14px;
+    font-size:13.5px;
+    font-weight:600;
+    max-width:88%;
+    text-align:center;
+    box-shadow:0 12px 30px rgba(0,0,0,.4);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .22s ease, transform .22s ease;
+    z-index:80;
+  }
+  .toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
 </style>
 </head>
 <body>
+<div class="toast" id="toast"></div>
 
 <div class="filmstrip"></div>
 
@@ -353,7 +604,7 @@
 <div class="sheet" id="sheet">
   <div class="sheet-handle"></div>
   <div class="sheet-hero">
-    <img class="sheet-poster" id="sheet-poster" src="" alt="">
+    <div class="sheet-poster" id="sheet-poster"></div>
     <div class="sheet-info">
       <h2 class="sheet-title" id="sheet-title"></h2>
       <div class="sheet-tags" id="sheet-tags"></div>
@@ -362,14 +613,38 @@
   </div>
   <div class="sheet-divider"></div>
   <p class="sheet-desc" id="sheet-desc"></p>
+  <div class="episodes-block" id="episodes-block" style="display:none;">
+    <p class="episodes-label">Fasl va qismlar</p>
+    <div class="season-tabs" id="season-tabs"></div>
+    <div class="episode-grid" id="episode-grid"></div>
+  </div>
   <div class="sheet-actions">
     <button class="btn-watch" id="btn-watch">▶ Tomosha qilish</button>
+    <button class="btn-fav" id="btn-fav" aria-label="Sevimlilarga qo'shish">☆</button>
     <button class="btn-close" id="btn-close">Yopish</button>
+  </div>
+</div>
+
+<div class="player-backdrop" id="player-backdrop">
+  <div class="player-inner">
+    <div class="player-title" id="player-title"></div>
+    <button class="player-close" id="player-close" aria-label="Yopish">✕</button>
+    <video id="player-video" controls playsinline></video>
   </div>
 </div>
 
 <script>
 const tg = window.Telegram?.WebApp;
+
+let toastTimer = null;
+function showMsg(text){
+  const el = document.getElementById('toast');
+  el.textContent = text;
+  el.classList.add('show');
+  tg?.HapticFeedback?.notificationOccurred?.('warning');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
 if (tg) {
   tg.ready();
   tg.expand();
@@ -378,23 +653,89 @@ if (tg) {
 }
 
 const MOVIES = [
-  { id:1, title:"Yulduzlar orasida", year:2014, genre:"Fantastika", rating:8.6, duration:"169 daq", desc:"Yer inqirozga yuz tutgan kelajakda, bir guruh astronavtlar insoniyatga yangi vatan topish umidida kosmosdagi qurtli teshik orqali sayohat qiladi.", poster:"https://picsum.photos/seed/interstellar/400/600" },
-  { id:2, title:"Boshlanish", year:2010, genre:"Triller", rating:8.4, duration:"148 daq", desc:"Tush ichiga kirib, odamlarning ongidan g'oyalarni o'g'irlaydigan mutaxassis, bu safar aksincha — birovning ongiga g'oya joylashtirish vazifasini oladi.", poster:"https://picsum.photos/seed/inception/400/600" },
-  { id:3, title:"Jasur yurak", year:1995, genre:"Drama", rating:8.3, duration:"178 daq", desc:"XIII asr Shotlandiyasida ozodlik uchun kurashgan jangchining haqiqiy voqealarga asoslangan tarixi.", poster:"https://picsum.photos/seed/braveheart/400/600" },
-  { id:4, title:"Matritsa", year:1999, genre:"Fantastika", rating:8.7, duration:"136 daq", desc:"Kompyuter dasturchisi voqelik aslida mashinalar tomonidan yaratilgan simulyatsiya ekanini bilib qoladi.", poster:"https://picsum.photos/seed/matrix/400/600" },
-  { id:5, title:"Qasoskorlar", year:2019, genre:"Jangari", rating:8.4, duration:"181 daq", desc:"Yer qahramonlari koinotni qutqarish uchun so'nggi va eng katta jangga tayyorlanmoqda.", poster:"https://picsum.photos/seed/avengers/400/600" },
-  { id:6, title:"Kulgili kunlar", year:2021, genre:"Komediya", rating:7.5, duration:"104 daq", desc:"Bir oilaning ta'til paytida boshidan kechirgan kulgili va kutilmagan sarguzashtlari.", poster:"https://picsum.photos/seed/funnydays/400/600" },
-  { id:7, title:"Zulmat qirg'og'ida", year:2018, genre:"Triller", rating:7.9, duration:"122 daq", desc:"Kichik shaharchada sodir bo'lgan sirli voqealarni tergovchi surishtiradi, ammo haqiqat undan ham qorong'iroq.", poster:"https://picsum.photos/seed/darkedge/400/600" },
-  { id:8, title:"Yo'lbars yuragi", year:2016, genre:"Drama", rating:8.1, duration:"131 daq", desc:"Sport dunyosida barcha qiyinchiliklarga qaramay g'alabaga intilgan yosh sportchining hikoyasi.", poster:"https://picsum.photos/seed/tigerheart/400/600" },
-  { id:9, title:"So'nggi chegara", year:2022, genre:"Jangari", rating:7.8, duration:"142 daq", desc:"Chegara qo'shinlari qo'mondoni o'z jamoasini xavfli missiyada omon saqlab qolishga urinadi.", poster:"https://picsum.photos/seed/lastfrontier/400/600" },
-  { id:10, title:"Kulgi terapiyasi", year:2020, genre:"Komediya", rating:7.2, duration:"98 daq", desc:"Hayotidan charchagan komediyachi kichik shaharchaga borib, u yerda kutilmagan do'stlar topadi.", poster:"https://picsum.photos/seed/laughtherapy/400/600" },
-  { id:11, title:"Chuqur suvlar", year:2017, genre:"Triller", rating:7.6, duration:"115 daq", desc:"Okeanograf o'z ekipaji bilan noma'lum chuqurlikdagi tajovuzkor mavjudot bilan yuzma-yuz keladi.", poster:"https://picsum.photos/seed/deepwaters/400/600" },
-  { id:12, title:"Ikki dunyo oralig'i", year:2023, genre:"Fantastika", rating:8.0, duration:"152 daq", desc:"Ikki parallel dunyo o'rtasida qolib ketgan qiz, uyiga qaytish yo'lini izlaydi.", poster:"https://picsum.photos/seed/betweenworlds/400/600" }
+  { id:13, title:"Qasoskorlar: Halokat kuni", year:2026, genre:"Jangari", upcoming:true, releaseDate:"18-dekabr, 2026", duration:"—", icon:"💀", desc:"Uch xil olamdan kelgan qahramonlar halokatli to'qnashuvga yuz tutadi va hech qachon uchramagan tahdidga qarshi kurashadi. Marvel jamoasi bu safar X-Men vakillari bilan birga chiqadi.", poster:"image/qasoskorlar.jpg", video:"" },
+  { id:14, title:"Jodugarlar jangi", year:2020, genre:"Anime", rating:8.5, duration:"3 fasl • 47+ qism", icon:"👹", desc:"La'natlangan barmoqni yutib yuborgan yigit o'zi la'natlanadi va qolgan qismlarni topib, la'natdan qutulish uchun jodugarlik maktabiga o'qishga kiradi.", poster:"image/jodugarlarjangi.jpg", video:"",
+    seasons:[ { label:"1-fasl", episodes:24 }, { label:"2-fasl", episodes:23 }, { label:"3-fasl", episodes:1 } ] },
+  { id:15, title:"Ko'k zindon", year:2022, genre:"Anime", rating:8.1, duration:"2 fasl • 38 qism", icon:"⚽", desc:"Yaponiya terma jamoasiga eng yaxshi hujumchini tayyorlash uchun yuzlab yosh futbolchi maxsus 'Ko'k zindon' dasturiga kiritiladi — faqat bittasi g'olib chiqadi.", poster:"image/kokzindon.jpg", video:"",
+    seasons:[ { label:"1-fasl", episodes:24 }, { label:"2-fasl", episodes:14 } ] },
+  { id:16, title:"O'rgimchak odam: Yangi kun", year:2026, genre:"Jangari", upcoming:true, releaseDate:"31-iyul, 2026", duration:"2 soat 25 daq", icon:"🕷️", desc:"Do'stlari uni unutgan shaharda yolg'iz qolgan Piter Parker to'liq vaqtli O'rgimchak odam sifatida jinoyatchilikka qarshi kurashadi, biroq bu yuk uni kutilmagan o'zgarishga olib keladi.", poster:"image/orgimchakodam.jpg", video:"" },
+  { id:17, title:"Flash", year:2023, genre:"Fantastika", rating:6.7, duration:"144 daq", icon:"⚡", desc:"O'z super tezligidan foydalanib o'tmishni o'zgartirgan Barri Allen, natijada butunlay boshqa va xavfli olamga tushib qoladi, uni asl vaqtga qaytarish esa oson bo'lmaydi.", poster:"image/flash.jpg", video:"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" },
+  { id:18, title:"Agarda", year:2021, genre:"Serial", rating:7.4, duration:"3 fasl • 30+ qism", icon:"🌀", desc:"Marvel olamidagi taniqli voqealardan biri boshqacha yakunlansa, nima bo'lishi mumkinligini ko'rsatuvchi animatsion antologiya — har bir qism yangi muqobil borliqni ochadi.", poster:"image/agarda.jpg", video:"",
+    seasons:[ { label:"1-fasl", episodes:9 }, { label:"2-fasl", episodes:9 }, { label:"3-fasl", episodes:9 } ] }
 ];
 
-const GENRES = ["Barchasi", "Drama", "Jangari", "Komediya", "Fantastika", "Triller"];
+const GENRE_THEME = {
+  "Drama":       { icon:"🎭", grad:"linear-gradient(160deg,#3a2a4d,#1c1424)" },
+  "Jangari":     { icon:"💥", grad:"linear-gradient(160deg,#4d2a2a,#241414)" },
+  "Komediya":    { icon:"😂", grad:"linear-gradient(160deg,#4d4a2a,#242214)" },
+  "Fantastika":  { icon:"🚀", grad:"linear-gradient(160deg,#2a3a4d,#14202b)" },
+  "Triller":     { icon:"🌀", grad:"linear-gradient(160deg,#2a2a2a,#0f0f0f)" },
+  "Anime":       { icon:"⛩️", grad:"linear-gradient(160deg,#4d2a45,#241120)" },
+  "Sarguzasht":  { icon:"🧭", grad:"linear-gradient(160deg,#2a4d3a,#142418)" },
+  "Serial":      { icon:"📺", grad:"linear-gradient(160deg,#2a3d4d,#13212b)" }
+};
+
+function fallbackPoster(el, m){
+  const theme = GENRE_THEME[m.genre] || { icon:"🎬", grad:"linear-gradient(160deg,#242030,#171520)" };
+  const icon = m.icon || theme.icon;
+  el.style.background = theme.grad;
+  el.innerHTML = `
+    <span class="poster-logo">KINO TOP</span>
+    <span class="poster-icon">${icon}</span>
+    <div class="poster-title">${m.title}</div>
+  `;
+}
+
+function applyPoster(el, m){
+  if (m.poster) {
+    el.style.background = '#0e0d12';
+    el.innerHTML = `
+      <img src="${m.poster}" alt="${m.title}" loading="lazy"
+           style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;">
+      <span class="poster-logo" style="z-index:2;">KINO TOP</span>
+    `;
+    // agar rasm topilmasa, ikonkali dizaynga qaytish
+    const img = el.querySelector('img');
+    img.addEventListener('error', () => fallbackPoster(el, m), { once:true });
+    return;
+  }
+  fallbackPoster(el, m);
+}
+
+const GENRES = ["Barchasi", "Drama", "Jangari", "Komediya", "Fantastika", "Triller", "Anime", "Sarguzasht", "Serial", "Sevimlilar"];
 let activeGenre = "Barchasi";
 let query = "";
+
+// --- Sevimlilar: Telegram CloudStorage bo'lsa shu yerda, aks holda xotirada saqlanadi ---
+let favorites = new Set();
+function loadFavorites(cb){
+  let done = false;
+  const finish = () => { if (!done) { done = true; cb?.(); } };
+  if (tg?.CloudStorage?.getItem) {
+    try {
+      tg.CloudStorage.getItem('favorites', (err, value) => {
+        if (!err && value) {
+          try { favorites = new Set(JSON.parse(value)); } catch(e) {}
+        }
+        finish();
+      });
+    } catch(e) { finish(); }
+    // Telegramdan tashqarida CloudStorage javob qaytarmasligi mumkin — shuning uchun sug'urta
+    setTimeout(finish, 700);
+  } else {
+    finish();
+  }
+}
+function saveFavorites(){
+  if (tg?.CloudStorage) {
+    tg.CloudStorage.setItem('favorites', JSON.stringify([...favorites]));
+  }
+}
+function toggleFavorite(id){
+  if (favorites.has(id)) favorites.delete(id); else favorites.add(id);
+  saveFavorites();
+  tg?.HapticFeedback?.impactOccurred?.('light');
+}
 
 const chipsEl = document.getElementById('chips');
 GENRES.forEach(g => {
@@ -405,14 +746,20 @@ GENRES.forEach(g => {
     activeGenre = g;
     document.querySelectorAll('.chip').forEach(el => el.classList.remove('active'));
     c.classList.add('active');
+    tg?.HapticFeedback?.selectionChanged?.();
     render();
   };
   chipsEl.appendChild(c);
 });
 
+let searchTimer = null;
 document.getElementById('search').addEventListener('input', e => {
-  query = e.target.value.trim().toLowerCase();
-  render();
+  clearTimeout(searchTimer);
+  const val = e.target.value;
+  searchTimer = setTimeout(() => {
+    query = val.trim().toLowerCase();
+    render();
+  }, 200);
 });
 
 function render(){
@@ -420,17 +767,28 @@ function render(){
   const empty = document.getElementById('empty');
   grid.innerHTML = '';
   const filtered = MOVIES.filter(m =>
-    (activeGenre === "Barchasi" || m.genre === activeGenre) &&
+    (activeGenre === "Barchasi" || (activeGenre === "Sevimlilar" ? favorites.has(m.id) : m.genre === activeGenre)) &&
     (query === "" || m.title.toLowerCase().includes(query))
   );
   empty.style.display = filtered.length ? 'none' : 'block';
+  if (!filtered.length) {
+    empty.textContent = activeGenre === "Sevimlilar" ? "Hali sevimlilar yo'q ⭐" : "Hech narsa topilmadi 🎬";
+  }
   filtered.forEach(m => {
     const card = document.createElement('div');
     card.className = 'ticket';
+    card.tabIndex = 0;
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-label', m.title);
+    const badge = m.upcoming
+      ? `<div class="rating-badge upcoming">🔜 TEZ KUNDA</div>`
+      : `<div class="rating-badge">★ ${m.rating}</div>`;
+    const favIcon = favorites.has(m.id) ? '⭐' : '';
     card.innerHTML = `
       <div style="position:relative;">
-        <img class="poster" src="${m.poster}" alt="${m.title}" loading="lazy">
-        <div class="rating-badge">★ ${m.rating}</div>
+        <div class="poster"></div>
+        ${favIcon ? `<div class="fav-mark">${favIcon}</div>` : ''}
+        ${badge}
       </div>
       <div class="stub-divider"></div>
       <div class="ticket-body">
@@ -438,7 +796,9 @@ function render(){
         <div class="ticket-meta"><span>${m.year}</span><span class="dot"></span><span>${m.genre}</span></div>
       </div>
     `;
-    card.onclick = () => openSheet(m);
+    applyPoster(card.querySelector('.poster'), m);
+    card.onclick = () => { tg?.HapticFeedback?.impactOccurred?.('light'); openSheet(m); };
+    card.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openSheet(m); } };
     grid.appendChild(card);
   });
 }
@@ -447,14 +807,114 @@ const sheet = document.getElementById('sheet');
 const backdrop = document.getElementById('backdrop');
 
 function openSheet(m){
-  document.getElementById('sheet-poster').src = m.poster;
+  applyPoster(document.getElementById('sheet-poster'), m);
   document.getElementById('sheet-title').textContent = m.title;
   document.getElementById('sheet-tags').innerHTML =
     `<span class="tag">${m.year}</span><span class="tag">${m.genre}</span><span class="tag">${m.duration}</span>`;
-  document.getElementById('sheet-rating').innerHTML = `★ ${m.rating} / 10`;
+  const ratingEl = document.getElementById('sheet-rating');
+  const watchBtn = document.getElementById('btn-watch');
+  if (m.upcoming) {
+    ratingEl.innerHTML = `🔜 Chiqish sanasi: ${m.releaseDate}`;
+    watchBtn.textContent = "🔔 Chiqqanda xabar bering";
+  } else {
+    ratingEl.innerHTML = `★ ${m.rating} / 10`;
+    watchBtn.textContent = m.seasons ? "▶ 1-qismni tomosha qilish" : "▶ Tomosha qilish";
+  }
   document.getElementById('sheet-desc').textContent = m.desc;
-  document.getElementById('btn-watch').onclick = () => {
-    tg?.showAlert ? tg.showAlert(`"${m.title}" filmi tez orada qo'shiladi 🎬`) : alert(`"${m.title}" filmi tez orada qo'shiladi 🎬`);
+
+  const favBtn = document.getElementById('btn-fav');
+  const syncFavBtn = () => {
+    const isFav = favorites.has(m.id);
+    favBtn.textContent = isFav ? '★' : '☆';
+    favBtn.classList.toggle('active', isFav);
+    favBtn.setAttribute('aria-label', isFav ? "Sevimlilardan olib tashlash" : "Sevimlilarga qo'shish");
+  };
+  syncFavBtn();
+  favBtn.onclick = () => {
+    toggleFavorite(m.id);
+    syncFavBtn();
+    if (activeGenre === "Sevimlilar") render();
+  };
+
+  const episodesBlock = document.getElementById('episodes-block');
+  let selectedSeason = 0, selectedEpisode = 1;
+
+  function updateWatchLabel(){
+    if (m.seasons && m.seasons.length) {
+      watchBtn.textContent = `▶ ${selectedEpisode}-qismni tomosha qilish`;
+    }
+  }
+
+  function playEpisode(seasonIdx, epNum){
+    selectedSeason = seasonIdx;
+    selectedEpisode = epNum;
+    const season = m.seasons[seasonIdx];
+    document.querySelectorAll('#season-tabs .season-tab').forEach((el,i) => el.classList.toggle('active', i === seasonIdx));
+    document.querySelectorAll('#episode-grid .episode-btn').forEach(el => el.classList.toggle('active', Number(el.textContent) === epNum));
+    updateWatchLabel();
+    if (m.video) {
+      closeSheet();
+      openPlayer(m, `${m.title} — ${season.label}, ${epNum}-qism`);
+    } else {
+      const msg = `"${m.title}" ${season.label}, ${epNum}-qism tez orada qo'shiladi 🎬`;
+      showMsg(msg);
+    }
+  }
+
+  function renderSeasonTabs(){
+    const tabsEl = document.getElementById('season-tabs');
+    tabsEl.innerHTML = '';
+    m.seasons.forEach((s, i) => {
+      const tab = document.createElement('div');
+      tab.className = 'season-tab' + (i === selectedSeason ? ' active' : '');
+      tab.textContent = s.label;
+      tab.onclick = () => {
+        selectedSeason = i;
+        selectedEpisode = 1;
+        tg?.HapticFeedback?.selectionChanged?.();
+        renderSeasonTabs();
+        renderEpisodeGrid();
+        updateWatchLabel();
+      };
+      tabsEl.appendChild(tab);
+    });
+  }
+
+  function renderEpisodeGrid(){
+    const gridEl = document.getElementById('episode-grid');
+    gridEl.innerHTML = '';
+    const season = m.seasons[selectedSeason];
+    for (let ep = 1; ep <= season.episodes; ep++) {
+      const btn = document.createElement('div');
+      btn.className = 'episode-btn' + (ep === selectedEpisode ? ' active' : '');
+      btn.textContent = ep;
+      btn.onclick = () => { tg?.HapticFeedback?.impactOccurred?.('light'); playEpisode(selectedSeason, ep); };
+      gridEl.appendChild(btn);
+    }
+  }
+
+  if (m.seasons && m.seasons.length) {
+    episodesBlock.style.display = 'block';
+    renderSeasonTabs();
+    renderEpisodeGrid();
+  } else {
+    episodesBlock.style.display = 'none';
+  }
+
+  watchBtn.onclick = () => {
+    if (m.seasons && m.seasons.length) {
+      playEpisode(selectedSeason, selectedEpisode);
+      return;
+    }
+    if (!m.upcoming && m.video) {
+      closeSheet();
+      openPlayer(m);
+      return;
+    }
+    const msg = m.upcoming
+      ? `"${m.title}" ${m.releaseDate}'da chiqadi — chiqqanda sizga xabar beramiz 🔔`
+      : `"${m.title}" filmi tez orada qo'shiladi 🎬`;
+    showMsg(msg);
   };
   sheet.classList.add('open');
   backdrop.classList.add('open');
@@ -469,9 +929,38 @@ function closeSheet(){
 
 document.getElementById('btn-close').onclick = closeSheet;
 backdrop.onclick = closeSheet;
-tg?.BackButton?.onClick(closeSheet);
 
-render();
+const playerBackdrop = document.getElementById('player-backdrop');
+const playerVideo = document.getElementById('player-video');
+const playerTitle = document.getElementById('player-title');
+
+function openPlayer(m, titleOverride){
+  playerTitle.textContent = titleOverride || m.title;
+  playerVideo.src = m.video;
+  playerBackdrop.classList.add('open');
+  playerVideo.play().catch(() => {});
+  tg?.BackButton?.show();
+}
+
+function closePlayer(){
+  playerVideo.pause();
+  playerVideo.removeAttribute('src');
+  playerVideo.load();
+  playerBackdrop.classList.remove('open');
+  tg?.BackButton?.hide();
+}
+
+document.getElementById('player-close').onclick = closePlayer;
+
+tg?.BackButton?.onClick(() => {
+  if (playerBackdrop.classList.contains('open')) {
+    closePlayer();
+  } else {
+    closeSheet();
+  }
+});
+
+loadFavorites(render);
 </script>
 </body>
 </html>
