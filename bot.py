@@ -25,7 +25,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN", "SIZNING_BOT_TOKENINGIZ")
 # Mini app joylashgan HTTPS manzil (masalan GitHub Pages, Vercel, Netlify).
 # Telegram Web App faqat HTTPS manzillar bilan ishlaydi — localhost ishlamaydi,
 # shuning uchun test uchun ngrok yoki shunga o'xshash xizmatdan foydalaning.
-WEBAPP_URL = os.getenv("WEBAPP_URL", "https://SIZNING-MANZILINGIZ.example/index.html")
+WEBAPP_URL = os.getenv("WEBAPP_URL", "https://ozodjalilov09-png.github.io/KINO-TOP/index.html")
 
 # Majburiy obuna bo'lishi kerak bo'lgan kanallar.
 # `chat_id` — bot admin qilingan kanalning username'i ("@kanal_nomi")
