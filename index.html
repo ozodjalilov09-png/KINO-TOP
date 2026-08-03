@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Kino Top</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://sad.adsgram.ai/js/sad-index.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -33,7 +34,6 @@
     overflow-x:hidden;
   }
 
-  /* Film-strip perforation band */
   .filmstrip{
     height:14px;
     width:100%;
@@ -157,7 +157,6 @@
     .grid{ grid-template-columns:repeat(5,1fr); }
   }
 
-  /* Ticket stub card — the signature element */
   .ticket{
     position:relative;
     background:var(--bg-elev);
@@ -299,7 +298,6 @@
     font-size:14px;
   }
 
-  /* Detail sheet */
   .sheet-backdrop{
     position:fixed; inset:0;
     background:rgba(5,4,7,.6);
@@ -383,7 +381,6 @@
     color:#d8d3e0;
   }
 
-  /* Season / episode picker for series & anime */
   .episodes-block{
     padding:16px 20px 0;
   }
@@ -437,7 +434,7 @@
     justify-content:center;
     background:var(--bg-elev-2);
     border:1px solid #2a2632;
-    border-radius:9px;
+    border-radius:99px;
     color:var(--text);
     font-size:12.5px;
     font-weight:700;
@@ -513,7 +510,6 @@
     cursor:pointer;
   }
 
-  /* Video player overlay */
   .player-backdrop{
     position:fixed; inset:0;
     background:#000;
@@ -674,6 +670,26 @@ if (tg) {
   tg.setBackgroundColor?.('#0e0d12');
 }
 
+// --- ADSGRAM REKLAMA INTEGRATSIYASI ---
+let adController = null;
+if (window.Adsgram) {
+  adController = window.Adsgram.init({ blockId: "int-41031" });
+}
+
+function showAdAndPlay(onSuccess) {
+  if (adController) {
+    adController.show().then((result) => {
+      onSuccess();
+    }).catch((err) => {
+      // Reklama yuklanmasa yoki xato bersa ham videoni ochamiz
+      console.log("Adsgram xato yoki yopildi:", err);
+      onSuccess();
+    });
+  } else {
+    onSuccess();
+  }
+}
+
 const MOVIES = [
   { id:13, title:"Qasoskorlar: Halokat kuni", year:2026, genre:"Jangari", upcoming:true, releaseDate:"18-dekabr, 2026", duration:"—", icon:"💀", desc:"Uch xil olamdan kelgan qahramonlar halokatli to'qnashuvga yuz tutadi va hech qachon uchramagan tahdidga qarshi kurashadi. Marvel jamoasi bu safar X-Men vakillari bilan birga chiqadi.", poster:"image/qasoskorlar.jpg", teaser:"video/qasoskorlar-tizer.mp4" },
   { id:14, title:"Jodugarlar jangi", year:2020, genre:"Anime", rating:8.5, duration:"3 fasl • 47+ qism", icon:"👹", desc:"La'natlangan barmoqni yutib yuborgan yigit o'zi la'natlanadi va qolgan qismlarni topib, la'natdan qutulish uchun jodugarlik maktabiga o'qishga kiradi.", poster:"image/jodugarlarjangi.jpg", video:"video/jodugarlarjangi.mp4",
@@ -720,7 +736,6 @@ function applyPoster(el, m){
            style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;">
       <span class="poster-logo" style="z-index:2;">KINO TOP</span>
     `;
-    // agar rasm topilmasa, ikonkali dizaynga qaytish
     const img = el.querySelector('img');
     img.addEventListener('error', () => fallbackPoster(el, m), { once:true });
     return;
@@ -732,7 +747,6 @@ const GENRES = ["Barchasi", "Drama", "Jangari", "Komediya", "Fantastika", "Trill
 let activeGenre = "Barchasi";
 let query = "";
 
-// --- Sevimlilar: Telegram CloudStorage bo'lsa shu yerda, aks holda xotirada saqlanadi ---
 let favorites = new Set();
 function loadFavorites(cb){
   let done = false;
@@ -746,7 +760,6 @@ function loadFavorites(cb){
         finish();
       });
     } catch(e) { finish(); }
-    // Telegramdan tashqarida CloudStorage javob qaytarmasligi mumkin — shuning uchun sug'urta
     setTimeout(finish, 700);
   } else {
     finish();
@@ -832,6 +845,11 @@ function render(){
 const sheet = document.getElementById('sheet');
 const backdrop = document.getElementById('backdrop');
 
+function closeSheet(){
+  sheet.classList.remove('open');
+  backdrop.classList.remove('open');
+}
+
 function openSheet(m){
   applyPoster(document.getElementById('sheet-poster'), m);
   document.getElementById('sheet-title').textContent = m.title;
@@ -875,13 +893,12 @@ function openSheet(m){
     selectedSeason = seasonIdx;
     selectedEpisode = epNum;
     const season = m.seasons[seasonIdx];
-    document.querySelectorAll('#season-tabs .season-tab').forEach((el,i) => el.classList.toggle('active', i === seasonIdx));
-    document.querySelectorAll('#episode-grid .episode-btn').forEach(el => el.classList.toggle('active', Number(el.textContent) === epNum));
-    updateWatchLabel();
     const videoUrl = episodeVideo(season, epNum);
     if (videoUrl) {
       closeSheet();
-      openPlayer({ ...m, video: videoUrl }, `${m.title} — ${season.label}, ${epNum}-qism`);
+      showAdAndPlay(() => {
+        openPlayer(videoUrl, `${m.title} — ${season.label}, ${epNum}-qism`);
+      });
     } else {
       const msg = `"${m.title}" ${season.label}, ${epNum}-qism tez orada qo'shiladi 🎬`;
       showMsg(msg);
@@ -927,7 +944,9 @@ function openSheet(m){
       const btn = document.createElement('div');
       btn.className = 'episode-btn' + (ep === selectedEpisode ? ' active' : '');
       btn.textContent = ep;
-      btn.onclick = () => { tg?.HapticFeedback?.impactOccurred?.('light'); playEpisode(selectedSeason, ep); };
+      btn.onclick = () => {
+        playEpisode(selectedSeason, ep);
+      };
       gridEl.appendChild(btn);
     }
   }
@@ -941,80 +960,66 @@ function openSheet(m){
   }
 
   const teaserRow = document.getElementById('teaser-row');
-  const teaserBtn = document.getElementById('btn-teaser');
+  const btnTeaser = document.getElementById('btn-teaser');
   if (m.teaser) {
     teaserRow.style.display = 'block';
-    teaserBtn.onclick = () => {
+    btnTeaser.onclick = () => {
       closeSheet();
-      openPlayer({ ...m, video: m.teaser }, `${m.title} — Tizer`);
+      showAdAndPlay(() => {
+        openPlayer(m.teaser, `${m.title} — Tizer`);
+      });
     };
   } else {
     teaserRow.style.display = 'none';
-    teaserBtn.onclick = null;
   }
 
   watchBtn.onclick = () => {
+    if (m.upcoming) {
+      showMsg("Bildirishnoma yoqildi 🔔");
+      return;
+    }
     if (m.seasons && m.seasons.length) {
       playEpisode(selectedSeason, selectedEpisode);
-      return;
-    }
-    if (m.upcoming) {
-      const msg = `"${m.title}" ${m.releaseDate}'da chiqadi — chiqqanda sizga xabar beramiz 🔔`;
-      showMsg(msg);
-      return;
-    }
-    if (m.video) {
+    } else if (m.video) {
       closeSheet();
-      openPlayer(m);
-      return;
+      showAdAndPlay(() => {
+        openPlayer(m.video, m.title);
+      });
+    } else {
+      showMsg("Video tez orada joylanadi 🎬");
     }
-    showMsg(`"${m.title}" filmi tez orada qo'shiladi 🎬`);
   };
+
+  document.getElementById('btn-close').onclick = closeSheet;
+  backdrop.onclick = closeSheet;
+
   sheet.classList.add('open');
   backdrop.classList.add('open');
-  tg?.BackButton?.show();
 }
-
-function closeSheet(){
-  sheet.classList.remove('open');
-  backdrop.classList.remove('open');
-  tg?.BackButton?.hide();
-}
-
-document.getElementById('btn-close').onclick = closeSheet;
-backdrop.onclick = closeSheet;
 
 const playerBackdrop = document.getElementById('player-backdrop');
 const playerVideo = document.getElementById('player-video');
 const playerTitle = document.getElementById('player-title');
+const playerClose = document.getElementById('player-close');
 
-function openPlayer(m, titleOverride){
-  playerTitle.textContent = titleOverride || m.title;
-  playerVideo.src = m.video;
+function openPlayer(src, title){
+  playerTitle.textContent = title || '';
+  playerVideo.src = src;
   playerBackdrop.classList.add('open');
   playerVideo.play().catch(() => {});
-  tg?.BackButton?.show();
 }
 
 function closePlayer(){
   playerVideo.pause();
-  playerVideo.removeAttribute('src');
-  playerVideo.load();
+  playerVideo.src = '';
   playerBackdrop.classList.remove('open');
-  tg?.BackButton?.hide();
 }
 
-document.getElementById('player-close').onclick = closePlayer;
+playerClose.onclick = closePlayer;
 
-tg?.BackButton?.onClick(() => {
-  if (playerBackdrop.classList.contains('open')) {
-    closePlayer();
-  } else {
-    closeSheet();
-  }
+loadFavorites(() => {
+  render();
 });
-
-loadFavorites(render);
 </script>
 </body>
 </html>
