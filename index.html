@@ -1074,8 +1074,13 @@ const AD_CONFIG = {
 };
 
 let adsgramController = null;
-if (window.Adsgram && ADSGRAM_BLOCK_ID !== "your-block-id") {
-  adsgramController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
+try {
+  if (window.Adsgram && ADSGRAM_BLOCK_ID !== "your-block-id") {
+    adsgramController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
+  }
+} catch (e) {
+  console.warn("Adsgram init failed:", e);
+  adsgramController = null;
 }
 
 const adBackdrop = document.getElementById('ad-backdrop');
@@ -1088,9 +1093,14 @@ let adCountdownInterval = null;
 function showAd(onDone){
   // 1) Avval Adsgram orqali urinib ko'ramiz (haqiqiy pul keltiradigan reklama).
   if (adsgramController) {
-    adsgramController.show()
-      .then(() => onDone())   // reklama to'liq ko'rildi
-      .catch(() => onDone()); // xato/o'tkazib yuborildi — baribir videoni ochamiz
+    try {
+      adsgramController.show()
+        .then(() => onDone())   // reklama to'liq ko'rildi
+        .catch(() => onDone()); // xato/o'tkazib yuborildi — baribir videoni ochamiz
+    } catch (e) {
+      console.warn("Adsgram show failed:", e);
+      onDone(); // kutilmagan xato bo'lsa ham video ochilaveradi
+    }
     return;
   }
   // 2) Adsgram sozlanmagan bo'lsa — o'zimizning oddiy bannerimiz.
@@ -1173,6 +1183,40 @@ tg?.BackButton?.onClick(() => {
 });
 
 loadFavorites(render);
+
+// Ilova ochilganda bitta reklama (sahifa to'liq yuklanishini kutib, keyin).
+setTimeout(() => {
+  if (adsgramController) {
+    try {
+      adsgramController.show().catch(() => {});
+    } catch (e) {
+      console.warn("Opening Adsgram show failed:", e);
+    }
+  }
+}, 1500);
+
+
+// --- Har 3 daqiqada avtomatik reklama ------------------------------------
+// Video pleyer yoki tafsilot oynasi ochiq bo'lmaganda ko'rsatiladi, shunda
+// foydalanuvchining tomosha qilishiga xalaqit bermaydi.
+const PERIODIC_AD_INTERVAL_MS = 30 * 1000; // 30 soniya (sinov uchun)
+
+function tryShowPeriodicAd(){
+  const playerOpen = playerBackdrop.classList.contains('open');
+  const sheetOpen = sheet.classList.contains('open');
+  const adAlreadyOpen = adBackdrop.classList.contains('open');
+  if (playerOpen || sheetOpen || adAlreadyOpen) return; // band bo'lsa o'tkazib yuboramiz
+
+  if (adsgramController) {
+    try {
+      adsgramController.show().catch(() => {});
+    } catch (e) {
+      console.warn("Periodic Adsgram show failed:", e);
+    }
+  }
+}
+
+setInterval(tryShowPeriodicAd, PERIODIC_AD_INTERVAL_MS);
 </script>
 </body>
 </html>
