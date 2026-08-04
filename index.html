@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Kino Top</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://sad.adsgram.ai/js/sad-index.js"></script>
+<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -34,6 +34,7 @@
     overflow-x:hidden;
   }
 
+  /* Film-strip perforation band */
   .filmstrip{
     height:14px;
     width:100%;
@@ -157,6 +158,7 @@
     .grid{ grid-template-columns:repeat(5,1fr); }
   }
 
+  /* Ticket stub card — the signature element */
   .ticket{
     position:relative;
     background:var(--bg-elev);
@@ -298,6 +300,7 @@
     font-size:14px;
   }
 
+  /* Detail sheet */
   .sheet-backdrop{
     position:fixed; inset:0;
     background:rgba(5,4,7,.6);
@@ -381,6 +384,7 @@
     color:#d8d3e0;
   }
 
+  /* Season / episode picker for series & anime */
   .episodes-block{
     padding:16px 20px 0;
   }
@@ -434,7 +438,7 @@
     justify-content:center;
     background:var(--bg-elev-2);
     border:1px solid #2a2632;
-    border-radius:99px;
+    border-radius:9px;
     color:var(--text);
     font-size:12.5px;
     font-weight:700;
@@ -510,6 +514,7 @@
     cursor:pointer;
   }
 
+  /* Video player overlay */
   .player-backdrop{
     position:fixed; inset:0;
     background:#000;
@@ -590,6 +595,67 @@
     opacity:1;
     transform:translateX(-50%) translateY(0);
   }
+  .ad-backdrop{
+    position:fixed; inset:0;
+    background:#000;
+    opacity:0; pointer-events:none;
+    transition:opacity .2s ease;
+    z-index:70;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+  }
+  .ad-backdrop.open{ opacity:1; pointer-events:auto; }
+  .ad-media{
+    max-width:100%;
+    max-height:78%;
+    object-fit:contain;
+  }
+  .ad-label{
+    position:absolute;
+    top:calc(14px + var(--safe-top));
+    left:16px;
+    color:var(--text-dim);
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    font-weight:700;
+    background:rgba(20,18,26,.7);
+    padding:5px 10px;
+    border-radius:999px;
+  }
+  .ad-skip{
+    position:absolute;
+    bottom:calc(28px + var(--safe-bottom, 0px));
+    right:20px;
+    padding:11px 20px;
+    border-radius:999px;
+    background:rgba(20,18,26,.85);
+    border:1px solid rgba(255,255,255,.18);
+    color:var(--text);
+    font-family:inherit;
+    font-weight:700;
+    font-size:13.5px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .ad-skip:disabled{
+    color:var(--text-dim);
+    cursor:default;
+  }
+  .ad-cta{
+    margin-top:16px;
+    color:var(--accent-soft);
+    font-size:13px;
+    font-weight:700;
+    text-decoration:none;
+    border:1px solid var(--accent);
+    padding:9px 18px;
+    border-radius:999px;
+  }
 </style>
 </head>
 <body>
@@ -643,6 +709,14 @@
   </div>
 </div>
 
+<div class="ad-backdrop" id="ad-backdrop">
+  <span class="ad-label">Reklama</span>
+  <img class="ad-media" id="ad-image" src="" alt="Reklama" style="display:none;">
+  <video class="ad-media" id="ad-video" playsinline style="display:none;"></video>
+  <a class="ad-cta" id="ad-cta" href="#" target="_blank" style="display:none;">Batafsil</a>
+  <button class="ad-skip" id="ad-skip">O'tkazib yuborish · <span id="ad-timer">5</span></button>
+</div>
+
 <div class="player-backdrop" id="player-backdrop">
   <div class="player-inner">
     <div class="player-title" id="player-title"></div>
@@ -668,26 +742,6 @@ if (tg) {
   tg.expand();
   tg.setHeaderColor?.('#0e0d12');
   tg.setBackgroundColor?.('#0e0d12');
-}
-
-// --- ADSGRAM REKLAMA INTEGRATSIYASI ---
-let adController = null;
-if (window.Adsgram) {
-  adController = window.Adsgram.init({ blockId: "int-41031" });
-}
-
-function showAdAndPlay(onSuccess) {
-  if (adController) {
-    adController.show().then((result) => {
-      onSuccess();
-    }).catch((err) => {
-      // Reklama yuklanmasa yoki xato bersa ham videoni ochamiz
-      console.log("Adsgram xato yoki yopildi:", err);
-      onSuccess();
-    });
-  } else {
-    onSuccess();
-  }
 }
 
 const MOVIES = [
@@ -736,6 +790,7 @@ function applyPoster(el, m){
            style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;">
       <span class="poster-logo" style="z-index:2;">KINO TOP</span>
     `;
+    // agar rasm topilmasa, ikonkali dizaynga qaytish
     const img = el.querySelector('img');
     img.addEventListener('error', () => fallbackPoster(el, m), { once:true });
     return;
@@ -747,6 +802,7 @@ const GENRES = ["Barchasi", "Drama", "Jangari", "Komediya", "Fantastika", "Trill
 let activeGenre = "Barchasi";
 let query = "";
 
+// --- Sevimlilar: Telegram CloudStorage bo'lsa shu yerda, aks holda xotirada saqlanadi ---
 let favorites = new Set();
 function loadFavorites(cb){
   let done = false;
@@ -760,6 +816,7 @@ function loadFavorites(cb){
         finish();
       });
     } catch(e) { finish(); }
+    // Telegramdan tashqarida CloudStorage javob qaytarmasligi mumkin — shuning uchun sug'urta
     setTimeout(finish, 700);
   } else {
     finish();
@@ -845,11 +902,6 @@ function render(){
 const sheet = document.getElementById('sheet');
 const backdrop = document.getElementById('backdrop');
 
-function closeSheet(){
-  sheet.classList.remove('open');
-  backdrop.classList.remove('open');
-}
-
 function openSheet(m){
   applyPoster(document.getElementById('sheet-poster'), m);
   document.getElementById('sheet-title').textContent = m.title;
@@ -893,12 +945,13 @@ function openSheet(m){
     selectedSeason = seasonIdx;
     selectedEpisode = epNum;
     const season = m.seasons[seasonIdx];
+    document.querySelectorAll('#season-tabs .season-tab').forEach((el,i) => el.classList.toggle('active', i === seasonIdx));
+    document.querySelectorAll('#episode-grid .episode-btn').forEach(el => el.classList.toggle('active', Number(el.textContent) === epNum));
+    updateWatchLabel();
     const videoUrl = episodeVideo(season, epNum);
     if (videoUrl) {
       closeSheet();
-      showAdAndPlay(() => {
-        openPlayer(videoUrl, `${m.title} — ${season.label}, ${epNum}-qism`);
-      });
+      openPlayer({ ...m, video: videoUrl }, `${m.title} — ${season.label}, ${epNum}-qism`);
     } else {
       const msg = `"${m.title}" ${season.label}, ${epNum}-qism tez orada qo'shiladi 🎬`;
       showMsg(msg);
@@ -944,9 +997,7 @@ function openSheet(m){
       const btn = document.createElement('div');
       btn.className = 'episode-btn' + (ep === selectedEpisode ? ' active' : '');
       btn.textContent = ep;
-      btn.onclick = () => {
-        playEpisode(selectedSeason, ep);
-      };
+      btn.onclick = () => { tg?.HapticFeedback?.impactOccurred?.('light'); playEpisode(selectedSeason, ep); };
       gridEl.appendChild(btn);
     }
   }
@@ -960,66 +1011,168 @@ function openSheet(m){
   }
 
   const teaserRow = document.getElementById('teaser-row');
-  const btnTeaser = document.getElementById('btn-teaser');
+  const teaserBtn = document.getElementById('btn-teaser');
   if (m.teaser) {
     teaserRow.style.display = 'block';
-    btnTeaser.onclick = () => {
+    teaserBtn.onclick = () => {
       closeSheet();
-      showAdAndPlay(() => {
-        openPlayer(m.teaser, `${m.title} — Tizer`);
-      });
+      openPlayer({ ...m, video: m.teaser }, `${m.title} — Tizer`);
     };
   } else {
     teaserRow.style.display = 'none';
+    teaserBtn.onclick = null;
   }
 
   watchBtn.onclick = () => {
-    if (m.upcoming) {
-      showMsg("Bildirishnoma yoqildi 🔔");
-      return;
-    }
     if (m.seasons && m.seasons.length) {
       playEpisode(selectedSeason, selectedEpisode);
-    } else if (m.video) {
-      closeSheet();
-      showAdAndPlay(() => {
-        openPlayer(m.video, m.title);
-      });
-    } else {
-      showMsg("Video tez orada joylanadi 🎬");
+      return;
     }
+    if (m.upcoming) {
+      const msg = `"${m.title}" ${m.releaseDate}'da chiqadi — chiqqanda sizga xabar beramiz 🔔`;
+      showMsg(msg);
+      return;
+    }
+    if (m.video) {
+      closeSheet();
+      openPlayer(m);
+      return;
+    }
+    showMsg(`"${m.title}" filmi tez orada qo'shiladi 🎬`);
   };
-
-  document.getElementById('btn-close').onclick = closeSheet;
-  backdrop.onclick = closeSheet;
-
   sheet.classList.add('open');
   backdrop.classList.add('open');
+  tg?.BackButton?.show();
 }
+
+function closeSheet(){
+  sheet.classList.remove('open');
+  backdrop.classList.remove('open');
+  tg?.BackButton?.hide();
+}
+
+document.getElementById('btn-close').onclick = closeSheet;
+backdrop.onclick = closeSheet;
 
 const playerBackdrop = document.getElementById('player-backdrop');
 const playerVideo = document.getElementById('player-video');
 const playerTitle = document.getElementById('player-title');
-const playerClose = document.getElementById('player-close');
 
-function openPlayer(src, title){
-  playerTitle.textContent = title || '';
-  playerVideo.src = src;
+// --- Reklama sozlamalari (Adsgram) ---------------------------------------
+// blockId: partner.adsgram.ai kabinetidan olingan Ad unit ID (raqamlar).
+// "your-block-id" ni haqiqiy ID'ingizga almashtiring.
+const ADSGRAM_BLOCK_ID = "int-41031";
+
+// Agar Adsgram ishlamasa (blockId qo'yilmagan, reklama topilmasa va h.k.),
+// shu oddiy banner ko'rsatiladi. Xohlamasangiz enabled: false qiling.
+const AD_CONFIG = {
+  enabled: true,
+  type: "image",
+  src: "image/reklama.jpg",
+  link: "",
+  skipAfter: 5,
+};
+
+let adsgramController = null;
+if (window.Adsgram && ADSGRAM_BLOCK_ID !== "your-block-id") {
+  adsgramController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
+}
+
+const adBackdrop = document.getElementById('ad-backdrop');
+const adImage = document.getElementById('ad-image');
+const adVideo = document.getElementById('ad-video');
+const adCta = document.getElementById('ad-cta');
+const adSkip = document.getElementById('ad-skip');
+let adCountdownInterval = null;
+
+function showAd(onDone){
+  // 1) Avval Adsgram orqali urinib ko'ramiz (haqiqiy pul keltiradigan reklama).
+  if (adsgramController) {
+    adsgramController.show()
+      .then(() => onDone())   // reklama to'liq ko'rildi
+      .catch(() => onDone()); // xato/o'tkazib yuborildi — baribir videoni ochamiz
+    return;
+  }
+  // 2) Adsgram sozlanmagan bo'lsa — o'zimizning oddiy bannerimiz.
+  showFallbackAd(onDone);
+}
+
+function showFallbackAd(onDone){
+  if (!AD_CONFIG.enabled || !AD_CONFIG.src) { onDone(); return; }
+
+  adImage.style.display = 'none';
+  adVideo.style.display = 'none';
+  adVideo.pause();
+  adCta.style.display = AD_CONFIG.link ? 'inline-block' : 'none';
+  if (AD_CONFIG.link) adCta.href = AD_CONFIG.link;
+
+  if (AD_CONFIG.type === 'video') {
+    adVideo.src = AD_CONFIG.src;
+    adVideo.style.display = 'block';
+    adVideo.play().catch(() => {});
+  } else {
+    adImage.src = AD_CONFIG.src;
+    adImage.style.display = 'block';
+  }
+
+  adBackdrop.classList.add('open');
+  let secondsLeft = AD_CONFIG.skipAfter;
+  adSkip.disabled = true;
+  adSkip.innerHTML = `O'tkazib yuborish · <span id="ad-timer">${secondsLeft}</span>`;
+
+  clearInterval(adCountdownInterval);
+  adCountdownInterval = setInterval(() => {
+    secondsLeft -= 1;
+    if (secondsLeft <= 0) {
+      clearInterval(adCountdownInterval);
+      adSkip.disabled = false;
+      adSkip.innerHTML = "O'tkazib yuborish ⏭";
+    } else {
+      const t = document.getElementById('ad-timer');
+      if (t) t.textContent = secondsLeft;
+    }
+  }, 1000);
+
+  adSkip.onclick = () => {
+    if (adSkip.disabled) return;
+    clearInterval(adCountdownInterval);
+    adBackdrop.classList.remove('open');
+    adVideo.pause();
+    onDone();
+  };
+}
+
+function openPlayer(m, titleOverride){
+  showAd(() => playVideoNow(m, titleOverride));
+}
+
+function playVideoNow(m, titleOverride){
+  playerTitle.textContent = titleOverride || m.title;
+  playerVideo.src = m.video;
   playerBackdrop.classList.add('open');
   playerVideo.play().catch(() => {});
+  tg?.BackButton?.show();
 }
 
 function closePlayer(){
   playerVideo.pause();
-  playerVideo.src = '';
+  playerVideo.removeAttribute('src');
+  playerVideo.load();
   playerBackdrop.classList.remove('open');
+  tg?.BackButton?.hide();
 }
 
-playerClose.onclick = closePlayer;
+document.getElementById('player-close').onclick = closePlayer;
 
-loadFavorites(() => {
-  render();
+tg?.BackButton?.onClick(() => {
+  if (playerBackdrop.classList.contains('open')) {
+    closePlayer();
+  } else {
+    closeSheet();
+  }
 });
+
+loadFavorites(render);
 </script>
 </body>
 </html>
